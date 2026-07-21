@@ -1,22 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Integration script -->
-    <script src="https://example.com/sdk.js"></script>
-
-    <!-- Or inline -->
-    <script>
-        console.log("Integration test loaded");
-    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Integration Test</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.ico">
+
+    <!-- Prevent browser caching while testing -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- ========================================================= -->
+    <!-- Third-Party Integration Script Goes Here                  -->
+    <!-- ========================================================= -->
+
+    <!-- Example -->
+    <!-- <script src="https://example.com/sdk.js"></script> -->
+
+    <!-- Your integration script -->
+
+    <!-- ========================================================= -->
+
+    <style>
+        body {
+            font-family: Segoe UI, Arial, sans-serif;
+            background: #f5f7fa;
+            color: #222;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 30px;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 12px rgba(0,0,0,.08);
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-left: 5px solid #2e8b57;
+            background: #eefaf2;
+        }
+
+        .version {
+            margin-top: 40px;
+            font-size: .9em;
+            color: #666;
+        }
+
+        code {
+            background: #eee;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+    </style>
+
+    <script>
+        console.log("🚀 Header script executed.");
+    </script>
 </head>
 
 <body>
-    <h1>Integration Test</h1>
-    <p>If you can read this, GitHub Pages is working.</p>
+
+    <div class="card">
+
+        <h1>🧪 Integration Test</h1>
+
+        <p>
+            This page is used to validate third-party integrations.
+        </p>
+
+        <div class="status">
+            <h3>Status</h3>
+
+            <div id="status">
+                Initializing...
+            </div>
+        </div>
+
+        <div class="version">
+            <strong>Version:</strong> 1.0.0<br>
+            <strong>Build:</strong> July 21, 2026<br>
+            <strong>Environment:</strong> GitHub Pages
+        </div>
+
+    </div>
+
+    <script>
+
+        function updateStatus(message, success = true) {
+
+            const status = document.getElementById("status");
+
+            status.innerHTML =
+                `${success ? "🟢" : "🔴"} ${message}`;
+
+            console.log(message);
+        }
+
+        window.addEventListener("load", () => {
+
+            updateStatus("Page loaded successfully.");
+
+            //
+            // Add additional integration checks below.
+            //
+
+            // Example:
+            // if (window.MySdk) {
+            //     updateStatus("SDK loaded successfully.");
+            // } else {
+            //     updateStatus("SDK failed to load.", false);
+            // }
+
+        });
+
+    </script>
+
 </body>
+
 </html>
