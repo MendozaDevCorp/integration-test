@@ -81,7 +81,8 @@ Every check should go red. If one stays green, it's asserting something that out
 
 | File | |
 | --- | --- |
-| `index.html` | The whole harness — markup, checks, styles |
+| `index.html` | Minimal harness — bare page, checks only |
+| `custom-landing-page.html` | Realistic landing page fixture. Same checks, plus campaign ID wiring, and enough structure to exercise scroll-depth, click, download and form instrumentation |
 | `favicon.png` | 180×180. Keep it small; a heavy favicon distorts load measurements |
 | `scripts/serve.ps1` | Local server control. Keep it ASCII-only — Windows PowerShell 5.1 reads BOM-less UTF-8 as ANSI and mangles non-ASCII characters mid-string |
 | `package.json` | Script shortcuts only. No dependencies, nothing to install |

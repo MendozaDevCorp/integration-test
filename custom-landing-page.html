@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Meridian — Ship faster with less guesswork</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <!-- Prevent browser caching while testing -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!--
+        Check registry.
+
+        Defined before any third-party script so async load/error handlers
+        always have somewhere to report. Results are buffered because an
+        async script can settle either before or after the status panel
+        exists in the DOM.
+    -->
+    <script>
+        window.checks = [];
+
+        //
+        // Snapshot the tracker's session record BEFORE any third-party script
+        // runs. sessionStorage survives navigation within a tab, so merely
+        // finding a record proves nothing — a stale one from a previous page
+        // load in the same tab would read as success. The probe below compares
+        // against this snapshot to prove THIS page load wrote it.
+        //
+        window.trackSnapshot = (function () {
+            try {
+                const raw = sessionStorage.getItem("_ox_track");
+                return raw ? (JSON.parse(raw).lastActivityAt || 0) : 0;
+            } catch (e) {
+                return 0;
+            }
+        })();
+
+        function recordCheck(name, ok, detail) {
+            window.checks.push({ name: name, ok: ok, detail: detail || "" });
+            renderChecks();
+        }
+
+        function renderChecks() {
+
+            const status = document.getElementById("status");
+
+            if (!status) return;
+
+            status.innerHTML = window.checks
+                .map(c => `${c.ok ? "🟢" : "🔴"} ${c.name}${c.detail ? ` — <code>${c.detail}</code>` : ""}`)
+                .join("<br>");
+
+            console.log(window.checks);
+        }
+    </script>
+
+    <!-- ========================================================= -->
+    <!-- Third-Party Integration Script Goes Here                  -->
+    <!-- ========================================================= -->
+
+    <!--
+        data-landing-page-id is deliberately omitted: this page is a custom
+        landing page and does not carry one. The tracker only attaches
+        landingPageId to the payload scope when the attribute is present, so
+        leaving it off is the supported way to opt out - do not set it to an
+        empty string, which is falsy and would read the same as absent while
+        implying it was configured.
+    -->
+    <script async
+            id="ox-tracker"
+            src="https://stdemandwebseudev.blob.core.windows.net/public-scripts/tracker.js"
+            data-tracking-id="co_grsj5r51cfg3rsky1fd0"
+            data-workspace-id="bf7ba3cdaa"
+            data-campaign-id="ef1d2fdba2"
+            onload="recordCheck('tracker.js fetched', true)"
+            onerror="recordCheck('tracker.js fetched', false, 'network or 404')"></script>
+
+    <!-- ========================================================= -->
+
+    <style>
+        :root {
+            --ink: #101728;
+            --ink-soft: #4a5568;
+            --line: #e3e8f0;
+            --bg: #ffffff;
+            --bg-alt: #f6f8fc;
+            --brand: #3d5afe;
+            --accent: #06b6a4;
+            --radius: 14px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+            color: var(--ink);
+            background: var(--bg);
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .wrap {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ---------- nav ---------- */
+
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px 0;
+            border-bottom: 1px solid var(--line);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            letter-spacing: -.02em;
+        }
+
+        .mark {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, var(--brand), var(--accent));
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-size: .95rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 26px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: var(--ink-soft);
+            text-decoration: none;
+            font-size: .93rem;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover { color: var(--brand); }
+
+        .fixture-chip {
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+            color: #92400e;
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 999px;
+            padding: 3px 10px;
+        }
+
+        /* ---------- hero ---------- */
+
+        header.hero {
+            padding: 84px 0 72px;
+            background:
+                radial-gradient(900px 420px at 12% -10%, #eef2ff 0%, transparent 60%),
+                radial-gradient(700px 380px at 92% 0%, #e6fffb 0%, transparent 55%);
+        }
+
+        .eyebrow {
+            display: inline-block;
+            font-size: .78rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--brand);
+            margin-bottom: 14px;
+        }
+
+        h1 {
+            font-size: clamp(2.1rem, 5vw, 3.4rem);
+            line-height: 1.1;
+            letter-spacing: -.03em;
+            margin: 0 0 18px;
+            max-width: 16ch;
+        }
+
+        .lede {
+            font-size: 1.16rem;
+            color: var(--ink-soft);
+            max-width: 54ch;
+            margin: 0 0 32px;
+        }
+
+        .cta-row {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-block;
+            border: 0;
+            border-radius: 10px;
+            padding: 13px 26px;
+            font-size: .97rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform .12s ease, box-shadow .12s ease;
+        }
+
+        .btn:active { transform: translateY(1px); }
+
+        .btn-primary {
+            background: var(--brand);
+            color: #fff;
+            box-shadow: 0 6px 18px rgba(61, 90, 254, .28);
+        }
+
+        .btn-primary:hover { box-shadow: 0 9px 26px rgba(61, 90, 254, .36); }
+
+        .btn-ghost {
+            background: #fff;
+            color: var(--ink);
+            border: 1px solid var(--line);
+        }
+
+        .btn-ghost:hover { border-color: var(--brand); color: var(--brand); }
+
+        /* ---------- sections ---------- */
+
+        section { padding: 72px 0; }
+
+        .alt {
+            background: var(--bg-alt);
+            border-top: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 3vw, 2.1rem);
+            letter-spacing: -.02em;
+            margin: 0 0 12px;
+        }
+
+        .section-lede {
+            color: var(--ink-soft);
+            max-width: 58ch;
+            margin: 0 0 40px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 22px;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 26px;
+        }
+
+        .card h3 { margin: 14px 0 8px; font-size: 1.06rem; }
+        .card p { margin: 0; color: var(--ink-soft); font-size: .95rem; }
+
+        .icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #eef2ff, #e6fffb);
+            display: grid;
+            place-items: center;
+            font-size: 1.1rem;
+        }
+
+        /* ---------- form ---------- */
+
+        .form-card {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 32px;
+            max-width: 560px;
+            box-shadow: 0 4px 24px rgba(16, 23, 40, .05);
+        }
+
+        .field { margin-bottom: 18px; }
+
+        label {
+            display: block;
+            font-size: .87rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px 13px;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            font-size: .95rem;
+            font-family: inherit;
+            color: var(--ink);
+            background: #fff;
+        }
+
+        input:focus, select:focus {
+            outline: 2px solid rgba(61, 90, 254, .35);
+            border-color: var(--brand);
+        }
+
+        .form-note {
+            font-size: .82rem;
+            color: var(--ink-soft);
+            margin-top: 14px;
+        }
+
+        #form-result {
+            margin-top: 16px;
+            font-size: .9rem;
+            display: none;
+            color: var(--ink-soft);
+        }
+
+        /* ---------- footer ---------- */
+
+        footer {
+            padding: 44px 0;
+            border-top: 1px solid var(--line);
+            color: var(--ink-soft);
+            font-size: .88rem;
+        }
+
+        /* ---------- dev harness overlay ---------- */
+
+        #harness {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            width: 340px;
+            max-width: calc(100vw - 36px);
+            background: #0e1525;
+            color: #e6edf7;
+            border-radius: 12px;
+            box-shadow: 0 14px 44px rgba(0, 0, 0, .35);
+            font-size: .82rem;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        #harness summary {
+            cursor: pointer;
+            padding: 12px 15px;
+            font-weight: 600;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #16203a;
+        }
+
+        #harness summary::-webkit-details-marker { display: none; }
+
+        #harness .body { padding: 14px 15px 16px; }
+
+        #status { line-height: 1.9; }
+
+        #harness code {
+            background: rgba(255, 255, 255, .09);
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: .93em;
+        }
+
+        .harness-meta {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, .12);
+            color: #9fb0cc;
+            font-size: .78rem;
+            line-height: 1.75;
+        }
+
+        .harness-meta strong { color: #e6edf7; font-weight: 600; }
+    </style>
+
+    <script>
+        console.log("🚀 Header script executed.");
+    </script>
+</head>
+
+<body>
+
+    <div class="wrap">
+        <nav>
+            <div class="brand">
+                <span class="mark">◆</span>
+                Meridian
+            </div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#resources">Resources</a>
+                <a href="#demo">Book a demo</a>
+                <span class="fixture-chip">Test fixture</span>
+            </div>
+        </nav>
+    </div>
+
+    <header class="hero">
+        <div class="wrap">
+            <span class="eyebrow">Release intelligence</span>
+            <h1>Ship faster with less guesswork</h1>
+            <p class="lede">
+                Meridian connects your deploys, incidents, and customer signals in one
+                timeline, so you can tell what actually changed when something breaks.
+            </p>
+            <div class="cta-row">
+                <a class="btn btn-primary" href="#demo">Book a demo</a>
+                <a class="btn btn-ghost" href="#features">See how it works</a>
+            </div>
+        </div>
+    </header>
+
+    <section id="features">
+        <div class="wrap">
+            <h2>Built for the messy middle</h2>
+            <p class="section-lede">
+                Most tools show you one system at a time. Meridian lines them all up
+                against the same clock.
+            </p>
+
+            <div class="grid">
+                <div class="card">
+                    <div class="icon">📈</div>
+                    <h3>Unified timeline</h3>
+                    <p>Deploys, flags, and alerts on one axis, so correlation stops being a guessing game.</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🔎</div>
+                    <h3>Change attribution</h3>
+                    <p>Trace a regression back to the release, the commit, and the person who can fix it.</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🛎️</div>
+                    <h3>Quiet alerting</h3>
+                    <p>Route by ownership instead of severity, and stop paging everyone at once.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="alt" id="resources">
+        <div class="wrap">
+            <h2>Resources</h2>
+            <p class="section-lede">
+                These links exist to exercise the tracker's click and download
+                instrumentation. The download target is intentionally a dead path:
+                the event fires on click, before navigation.
+            </p>
+
+            <div class="cta-row">
+                <a class="btn btn-ghost" href="/assets/meridian-overview.pdf" download>Download the overview (PDF)</a>
+                <a class="btn btn-ghost" href="https://example.com/pricing">Outbound link</a>
+                <button class="btn btn-ghost" type="button">Plain button (no href)</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="demo">
+        <div class="wrap">
+            <h2>Book a demo</h2>
+            <p class="section-lede">
+                Submits via <code>fetch</code> to <code>/FormSubmissions/Submit</code>, which is the
+                path the tracker patches in order to enrich the request body with visitor
+                and session identity.
+            </p>
+
+            <form class="form-card" id="demo-form">
+                <div class="field">
+                    <label for="name">Name</label>
+                    <input id="name" name="name" type="text" placeholder="Ada Lovelace" required>
+                </div>
+                <div class="field">
+                    <label for="email">Work email</label>
+                    <input id="email" name="email" type="email" placeholder="ada@example.com" required>
+                </div>
+                <div class="field">
+                    <label for="company">Company</label>
+                    <input id="company" name="company" type="text" placeholder="Example Corp">
+                </div>
+                <div class="field">
+                    <label for="size">Team size</label>
+                    <select id="size" name="size">
+                        <option>1-10</option>
+                        <option>11-50</option>
+                        <option>51-200</option>
+                        <option>200+</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" type="submit">Request a demo</button>
+
+                <p class="form-note">
+                    Test fixture. Use dummy values; this is not a real intake form.
+                </p>
+
+                <div id="form-result"></div>
+            </form>
+        </div>
+    </section>
+
+    <section class="alt">
+        <div class="wrap">
+            <h2>Why the page is this tall</h2>
+            <p class="section-lede">
+                The tracker emits <code>scroll_depth</code> at 25%, 50%, 75% and 100%. A short page
+                reports 100% immediately on load, because there is nothing to scroll, which
+                looks like success while actually testing nothing. The filler below exists so
+                the thresholds fire in sequence, the way they would on a real landing page.
+            </p>
+
+            <div class="grid">
+                <div class="card">
+                    <h3>Deploy correlation</h3>
+                    <p>Every release is annotated on the timeline with its author, diff size, and rollout window, so regressions can be traced without cross-referencing four tools.</p>
+                </div>
+                <div class="card">
+                    <h3>Ownership routing</h3>
+                    <p>Alerts follow the service catalogue rather than a static on-call list, which keeps unrelated teams out of incident channels they cannot act on.</p>
+                </div>
+                <div class="card">
+                    <h3>Signal retention</h3>
+                    <p>Raw events stay queryable for ninety days and rolled-up metrics stay indefinitely, so quarter-over-quarter comparisons survive a retention window.</p>
+                </div>
+                <div class="card">
+                    <h3>Import paths</h3>
+                    <p>Backfill from existing providers so the timeline is useful on day one instead of after a quarter of accumulated history.</p>
+                </div>
+                <div class="card">
+                    <h3>Access control</h3>
+                    <p>Scoped tokens per environment, with read-only defaults, so a compromised integration cannot mutate production configuration.</p>
+                </div>
+                <div class="card">
+                    <h3>Audit trail</h3>
+                    <p>Every configuration change records actor, timestamp, and previous value, which turns "who turned this off" into a query rather than an investigation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="wrap">
+            <strong>Meridian</strong> is a placeholder brand for integration testing. Not a real product.<br>
+            Version 1.0.0 &middot; Environment: GitHub Pages
+        </div>
+    </footer>
+
+    <!-- ========================= dev harness ========================= -->
+
+    <details id="harness" open>
+        <summary>
+            <span>Integration status</span>
+            <span style="font-weight:400;opacity:.6">&#9662;</span>
+        </summary>
+        <div class="body">
+            <div id="status">Initializing...</div>
+            <div class="harness-meta" id="harness-meta"></div>
+        </div>
+    </details>
+
+    <script>
+
+        //
+        // Fetching a script is not the same as it initializing. tracker.js is a
+        // self-contained IIFE that exports no global, and it bails out silently
+        // when document.currentScript is unavailable (module context, eval, or
+        // re-execution inside a callback) because that is where it reads its
+        // data-tracking-id from. In that case the request still returns 200 and
+        // onload still fires, so load and init are asserted separately.
+        //
+        // Observable proof it ran to completion:
+        //   window.fetch.__oxPatched === true   (set when it wraps fetch)
+        //   sessionStorage['_ox_track']         (session record it writes)
+        //
+        const INIT_PROBES = [
+            {
+                name: "tracker.js initialized",
+                test: () => window.fetch && window.fetch.__oxPatched === true,
+                detail: "window.fetch.__oxPatched not set - check document.currentScript"
+            },
+            {
+                name: "tracker.js recorded this page view",
+                test: () => {
+                    try {
+                        const raw = sessionStorage.getItem("_ox_track");
+                        if (!raw) return false;
+                        return (JSON.parse(raw).lastActivityAt || 0) > window.trackSnapshot;
+                    } catch (e) {
+                        return false;
+                    }
+                },
+                detail: "sessionStorage._ox_track not updated for this page load"
+            },
+            {
+                //
+                // The campaign ID is read off the script tag and forwarded without
+                // validation, so a typo'd attribute name fails silently - attribution
+                // just goes missing. This asserts the wiring rather than the value.
+                //
+                // No landing page ID is asserted: this page intentionally does not
+                // carry one.
+                //
+                name: "campaign ID set",
+                test: () => {
+                    const tag = document.getElementById("ox-tracker");
+                    if (!tag) return false;
+                    const c = tag.getAttribute("data-campaign-id");
+                    return Boolean(c) && !c.includes("REPLACE_ME");
+                },
+                detail: "data-campaign-id missing or still a placeholder"
+            }
+        ];
+
+        // Injected scripts can land well after load, so give each probe a
+        // grace period before calling it a failure rather than assuming
+        // everything has settled by the load event.
+        const GRACE_MS = 3000;
+        const POLL_MS = 100;
+
+        function awaitProbe(probe) {
+
+            const deadline = Date.now() + GRACE_MS;
+
+            (function poll() {
+
+                if (probe.test()) {
+                    recordCheck(probe.name, true);
+                    return;
+                }
+
+                if (Date.now() > deadline) {
+                    recordCheck(probe.name, false, probe.detail);
+                    return;
+                }
+
+                setTimeout(poll, POLL_MS);
+            })();
+        }
+
+        // Echo the configured identifiers, so a wrong-but-present value is
+        // visible on the page rather than hidden behind a green tick.
+        function renderMeta() {
+
+            const tag = document.getElementById("ox-tracker");
+            if (!tag) return;
+
+            const rows = [
+                ["campaign", tag.getAttribute("data-campaign-id")],
+                ["workspace", tag.getAttribute("data-workspace-id")]
+            ];
+
+            document.getElementById("harness-meta").innerHTML = rows
+                .map(([k, v]) => `<strong>${k}:</strong> <code>${v || "unset"}</code>`)
+                .join("<br>");
+        }
+
+        window.addEventListener("load", () => {
+
+            recordCheck("Page loaded", true);
+
+            INIT_PROBES.forEach(awaitProbe);
+            renderMeta();
+
+            //
+            // To test another integration: add its <script> tag in <head> with
+            // onload/onerror wired to recordCheck, then add an INIT_PROBES entry
+            // asserting a side effect that proves it actually ran.
+            //
+        });
+
+        //
+        // The tracker patches window.fetch and enriches any request whose URL
+        // contains /FormSubmissions/Submit. Submitting through fetch (rather than
+        // a native form post) is what puts the request on that code path.
+        //
+        document.getElementById("demo-form").addEventListener("submit", async (e) => {
+
+            e.preventDefault();
+
+            const out = document.getElementById("form-result");
+            const body = JSON.stringify(Object.fromEntries(new FormData(e.target)));
+
+            out.style.display = "block";
+            out.textContent = "Submitting...";
+
+            try {
+                const res = await fetch("/FormSubmissions/Submit", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: body
+                });
+                out.textContent = `Response: ${res.status} ${res.statusText}. ` +
+                    `A non-2xx is expected locally, since the endpoint does not exist here. ` +
+                    `What matters is that the tracker enriched the body first.`;
+            } catch (err) {
+                out.textContent = `Request failed: ${err.message}. ` +
+                    `Expected locally; the enrichment path still ran.`;
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>
