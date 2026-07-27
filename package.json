@@ -1,0 +1,13 @@
+{
+  "name": "integration-test",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static harness for validating third-party integrations",
+  "scripts": {
+    "start": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/serve.ps1 -Action start",
+    "stop": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/serve.ps1 -Action stop",
+    "restart": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/serve.ps1 -Action restart",
+    "status": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/serve.ps1 -Action status",
+    "logs": "powershell -NoProfile -Command \"Get-Content .server.log -Tail 40 -Wait\""
+  }
+}

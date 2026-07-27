@@ -1,0 +1,9 @@
+# Local server runtime state
+.server.pid
+.server.log
+.server.log.err
+
+# Scratch page from failure-path testing
+_failtest.html
+
+node_modules/
