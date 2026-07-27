@@ -15,14 +15,67 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
+    <!--
+        Check registry.
+
+        Defined before any third-party script so async load/error handlers
+        always have somewhere to report. Results are buffered because an
+        async script can settle either before or after the status panel
+        exists in the DOM.
+    -->
+    <script>
+        window.checks = [];
+
+        //
+        // Snapshot the tracker's session record BEFORE any third-party script
+        // runs. sessionStorage survives navigation within a tab, so merely
+        // finding a record proves nothing — a stale one from a previous page
+        // load in the same tab would read as success. The probe below compares
+        // against this snapshot to prove THIS page load wrote it.
+        //
+        window.trackSnapshot = (function () {
+            try {
+                const raw = sessionStorage.getItem("_ox_track");
+                return raw ? (JSON.parse(raw).lastActivityAt || 0) : 0;
+            } catch (e) {
+                return 0;
+            }
+        })();
+
+        function recordCheck(name, ok, detail) {
+            window.checks.push({ name: name, ok: ok, detail: detail || "" });
+            renderChecks();
+        }
+
+        function renderChecks() {
+
+            const status = document.getElementById("status");
+
+            if (!status) return;
+
+            status.innerHTML = window.checks
+                .map(c => `${c.ok ? "🟢" : "🔴"} ${c.name}${c.detail ? ` — <code>${c.detail}</code>` : ""}`)
+                .join("<br>");
+
+            console.log(window.checks);
+        }
+    </script>
+
     <!-- ========================================================= -->
     <!-- Third-Party Integration Script Goes Here                  -->
     <!-- ========================================================= -->
 
     <!-- Example -->
-    <!-- <script src="https://example.com/sdk.js"></script> -->
+    <!-- <script src="https://example.com/sdk.js" -->
+    <!--         onload="recordCheck('sdk.js fetched', true)"  -->
+    <!--         onerror="recordCheck('sdk.js fetched', false)"></script> -->
 
-    <script async src="https://stdemandwebseudev.blob.core.windows.net/public-scripts/tracker.js" data-tracking-id="co_grsj5r51cfg3rsky1fd0" data-workspace-id="bf7ba3cdaa"></script>
+    <script async
+            src="https://stdemandwebseudev.blob.core.windows.net/public-scripts/tracker.js"
+            data-tracking-id="co_grsj5r51cfg3rsky1fd0"
+            data-workspace-id="bf7ba3cdaa"
+            onload="recordCheck('tracker.js fetched', true)"
+            onerror="recordCheck('tracker.js fetched', false, 'network or 404')"></script>
 
     <!-- ========================================================= -->
 
@@ -92,7 +145,6 @@
 
         <div class="version">
             <strong>Version:</strong> 1.0.0<br>
-            <strong>Build:</strong> July 21, 2026<br>
             <strong>Environment:</strong> GitHub Pages
         </div>
 
@@ -100,31 +152,76 @@
 
     <script>
 
-        function updateStatus(message, success = true) {
+        //
+        // Fetching a script is not the same as it initializing. tracker.js is a
+        // self-contained IIFE that exports no global, and it bails out silently
+        // when document.currentScript is unavailable (module context, eval, or
+        // re-execution inside a callback) because that is where it reads its
+        // data-tracking-id from. In that case the request still returns 200 and
+        // onload still fires, so load and init are asserted separately.
+        //
+        // Observable proof it ran to completion:
+        //   window.fetch.__oxPatched === true   (set when it wraps fetch)
+        //   sessionStorage['_ox_track']         (session record it writes)
+        //
+        const INIT_PROBES = [
+            {
+                name: "tracker.js initialized",
+                test: () => window.fetch && window.fetch.__oxPatched === true,
+                detail: "window.fetch.__oxPatched not set — check document.currentScript"
+            },
+            {
+                name: "tracker.js recorded this page view",
+                test: () => {
+                    try {
+                        const raw = sessionStorage.getItem("_ox_track");
+                        if (!raw) return false;
+                        return (JSON.parse(raw).lastActivityAt || 0) > window.trackSnapshot;
+                    } catch (e) {
+                        return false;
+                    }
+                },
+                detail: "sessionStorage._ox_track not updated for this page load"
+            }
+        ];
 
-            const status = document.getElementById("status");
+        // Injected scripts can land well after load, so give each probe a
+        // grace period before calling it a failure rather than assuming
+        // everything has settled by the load event.
+        const GRACE_MS = 3000;
+        const POLL_MS = 100;
 
-            status.innerHTML =
-                `${success ? "🟢" : "🔴"} ${message}`;
+        function awaitProbe(probe) {
 
-            console.log(message);
+            const deadline = Date.now() + GRACE_MS;
+
+            (function poll() {
+
+                if (probe.test()) {
+                    recordCheck(probe.name, true);
+                    return;
+                }
+
+                if (Date.now() > deadline) {
+                    recordCheck(probe.name, false, probe.detail);
+                    return;
+                }
+
+                setTimeout(poll, POLL_MS);
+            })();
         }
 
         window.addEventListener("load", () => {
 
-            updateStatus("Page loaded successfully.");
+            recordCheck("Page loaded", true);
+
+            INIT_PROBES.forEach(awaitProbe);
 
             //
-            // Add additional integration checks below.
+            // To test another integration: add its <script> tag in <head> with
+            // onload/onerror wired to recordCheck, then add an INIT_PROBES entry
+            // asserting a side effect that proves it actually ran.
             //
-
-            // Example:
-            // if (window.MySdk) {
-            //     updateStatus("SDK loaded successfully.");
-            // } else {
-            //     updateStatus("SDK failed to load.", false);
-            // }
-
         });
 
     </script>
