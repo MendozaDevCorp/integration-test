@@ -66,12 +66,15 @@
     <!-- ========================================================= -->
 
     <!--
-        data-landing-page-id is deliberately omitted: this page is a custom
-        landing page and does not carry one. The tracker only attaches
-        landingPageId to the payload scope when the attribute is present, so
-        leaving it off is the supported way to opt out - do not set it to an
-        empty string, which is falsy and would read the same as absent while
-        implying it was configured.
+        These identifiers are forwarded to the ingest endpoint without
+        validation, so a wrong value is recorded as though it were correct and
+        a typo'd attribute name fails silently - attribution just goes missing.
+        The probe below asserts the wiring; only you can confirm the values.
+
+        Do not blank one out to disable it: an empty string is falsy, so the
+        tracker omits the field from the payload entirely, which reads as "not
+        configured" while looking configured in the markup. Remove the whole
+        attribute instead.
     -->
     <script async
             id="ox-tracker"
@@ -79,6 +82,7 @@
             data-tracking-id="co_grsj5r51cfg3rsky1fd0"
             data-workspace-id="bf7ba3cdaa"
             data-campaign-id="ef1d2fdba2"
+            data-landing-page-id="38b6d61dcf"
             onload="recordCheck('tracker.js fetched', true)"
             onerror="recordCheck('tracker.js fetched', false, 'network or 404')"></script>
 
@@ -623,21 +627,21 @@
             },
             {
                 //
-                // The campaign ID is read off the script tag and forwarded without
-                // validation, so a typo'd attribute name fails silently - attribution
-                // just goes missing. This asserts the wiring rather than the value.
+                // Campaign and landing page IDs are read off the script tag and
+                // forwarded without validation, so a typo'd attribute name fails
+                // silently - attribution just goes missing. This asserts the wiring,
+                // and stays red while either value is still a placeholder.
                 //
-                // No landing page ID is asserted: this page intentionally does not
-                // carry one.
-                //
-                name: "campaign ID set",
+                name: "campaign + landing page IDs set",
                 test: () => {
                     const tag = document.getElementById("ox-tracker");
                     if (!tag) return false;
                     const c = tag.getAttribute("data-campaign-id");
-                    return Boolean(c) && !c.includes("REPLACE_ME");
+                    const l = tag.getAttribute("data-landing-page-id");
+                    return Boolean(c) && Boolean(l) &&
+                           !c.includes("REPLACE_ME") && !l.includes("REPLACE_ME");
                 },
-                detail: "data-campaign-id missing or still a placeholder"
+                detail: "missing or still a placeholder"
             }
         ];
 
@@ -676,6 +680,7 @@
 
             const rows = [
                 ["campaign", tag.getAttribute("data-campaign-id")],
+                ["landing page", tag.getAttribute("data-landing-page-id")],
                 ["workspace", tag.getAttribute("data-workspace-id")]
             ];
 
